@@ -12,7 +12,7 @@ import * as strings from 'SpFxHttpClientDemoWebPartStrings';
 import SpFxHttpClientDemo from './components/SpFxHttpClientDemo';
 import { ISpFxHttpClientDemoProps } from './components/ISpFxHttpClientDemoProps';
 
-import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
+import { SPHttpClient, SPHttpClientResponse, ISPHttpClientOptions } from '@microsoft/sp-http';
 import { ICountryListItem } from '../../models';
 
 export interface ISpFxHttpClientDemoWebPartProps {
@@ -34,6 +34,7 @@ export default class SpFxHttpClientDemoWebPart extends BaseClientSideWebPart<ISp
         onAddListItem: this._onAddListItem,
         onUpdateListItem: this._onUpdateListItem,
         onDeleteListItem: this._onDeleteListItem,
+        onUploadBtnClick: this._uploadFile.bind(this),
         description: this.properties.description,
         isDarkTheme: this._isDarkTheme,
         environmentMessage: this._environmentMessage,
@@ -190,6 +191,20 @@ export default class SpFxHttpClientDemoWebPart extends BaseClientSideWebPart<ISp
     }
     const responseJson = await response.json();
     return responseJson.value as ICountryListItem[];
+  }
+
+  private async _uploadFile(fileData: ArrayBuffer, fileName: string): Promise<void> {
+    const endpoint = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/GetByTitle('Documents')/RootFolder/Files/add(overwrite=true,url='${fileName}')`;
+    const options: ISPHttpClientOptions = {
+      headers: { 'CONTENT-LENGTH': fileData.byteLength.toString() },
+      body: fileData
+    };
+    const response = await this.context.spHttpClient.post(endpoint, SPHttpClient.configurations.v1, options);
+    if (response.status === 200) {
+      alert('File uploaded successfully');
+    } else {
+      throw new Error(`Error uploading file: ${response.statusText}`);
+    }
   }
 
   private _getEnvironmentMessage(): Promise<string> {

@@ -9,6 +9,7 @@ export interface ISpFxHttpClientDemoProps {
   onAddListItem: ButtonClickedCallback;
   onUpdateListItem: ButtonClickedCallback;
   onDeleteListItem: ButtonClickedCallback;
+  onUploadBtnClick: (fileData: ArrayBuffer, fileName: string) => Promise<void>;
   description: string;
   isDarkTheme: boolean;
   environmentMessage: string;
